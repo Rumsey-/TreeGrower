@@ -41,7 +41,8 @@ GLfloat eyeRotation = 45.0;
 GLfloat aspect = 1.0f;
 GLfloat zoomFactor = 1.0f;
 
-
+int currentTime = 0;
+float lambda = .005;
 
 static void reshape_CB(GLsizei width, GLsizei height)
 {
@@ -141,8 +142,9 @@ void advanceTimeRecursion(struct branch* currBranch, glm::vec3 heightIncrease)
 }
 
 void advanceTime() {
-	growthFactor = growthFactor*.95;
+	growthFactor = growthFactor*exp(-currentTime*lambda);
 	advanceTimeRecursion(mainBranch, glm::vec3(0.0f));
+	currentTime++;
 }
 
 void displayBranchRecursion(struct branch* currBranch)
@@ -258,6 +260,7 @@ void key(unsigned char key, int x_cord, int y_cord) {
 		trunk->steps = 0;
 		mainBranch = trunk;
 
+		currentTime = 0;
 	}
 	//solid fill
 	if (key == 's' || key == 'S') {
