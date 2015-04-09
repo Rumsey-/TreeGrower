@@ -30,7 +30,16 @@ struct branch {
 	float z_angle;
 };
 
-struct branch* mainBranch;
+struct trunk {
+    struct branch * branches;
+    struct trunk * next;
+};
+
+struct trunk* trees;
+
+int amountOfTrees = 9;
+
+//struct branch* mainBranch;
 
 /*camera vertical position */
 GLdouble verticalPos = 0.0;
@@ -143,7 +152,14 @@ void advanceTimeRecursion(struct branch* currBranch, glm::vec3 heightIncrease)
 
 void advanceTime() {
 	growthFactor = growthFactor*exp(-currentTime*lambda);
-	advanceTimeRecursion(mainBranch, glm::vec3(0.0f));
+
+    // Go through each tree and advance the branches within them
+    struct trunk* walker = trees;
+    while(walker != NULL)
+    {
+	    advanceTimeRecursion(walker->branches, glm::vec3(0.0f));
+        walker = walker->next;
+    }
 	currentTime++;
 }
 
@@ -187,7 +203,15 @@ void display()
 	glEnable(GL_DEPTH_TEST);
 
 	glBegin(GL_LINES);
-	displayBranchRecursion(mainBranch);
+
+    // Go through each tree and draw the branches within them
+    struct trunk* walker = trees;
+    while(walker != NULL)
+    {
+	    displayBranchRecursion(walker->branches);
+        walker = walker->next;
+    }
+
 	glEnd();
 	glFlush();
 
@@ -212,6 +236,60 @@ void initialize()
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);						// specify implementation-specific hints
 	glClearColor(0.0, 0.0, 0.0, 1.0);											// specify clear values for the color buffers			
 	glLineWidth(2);
+}
+
+
+// Create x trees where x is the input value
+// Will create a y by y grid of trees where y = sqrt of input.
+struct trunk* plantSeeds(int amount)
+{
+    // Have the trees spaced about 1 away from each other
+    float maxDist = 1.0f * amount;
+
+    // Start in negative, add to positive 
+    // Reason: origin is in middle of screen, need negative half
+    float xPos = maxDist / 2 * (-1);
+    float zPos = maxDist / 2 * (-1);
+
+    // The amount we add with each tree
+    float xInc = maxDist / sqrt(amount);
+    float zInc = maxDist / sqrt(amount);
+
+    // Center if we are only generating one tree
+    if(amount == 1)
+    {
+        xPos = 0.0f;
+        zPos = 0.0f;
+    }
+
+    // Creates the amount of trees requested
+    for(int i = 0; i < amount; i++)
+    {
+        trunk* trun = (struct trunk*) calloc(1, sizeof(struct trunk));
+        branch* bran = (struct branch*) calloc(1, sizeof(struct branch));
+	    growthFactor = .3;
+	    bran->branchGrowing = true;
+
+        // Since the xz plane is the "ground", we set them to move the tree position
+	    bran->startPoint.x = bran->endPoint.x = xPos;
+	    bran->startPoint.z = bran->endPoint.z = zPos;
+    
+        xPos += xInc;
+        if(xPos >= maxDist / 2)
+        {
+            xPos = maxDist / 2 * (-1);
+            zPos += zInc;
+        }
+
+        // y will always be one to start the tree growing on the "ground"
+	    bran->startPoint.y = bran->endPoint.y = 0.0f;
+	    bran->angle = 0;
+	    bran->z_angle = 0;
+	    bran->steps = 0;
+        trun->branches = bran;
+        trun->next = trees;
+	    trees = trun;
+    }
 }
 
 
@@ -249,16 +327,8 @@ void key(unsigned char key, int x_cord, int y_cord) {
 		gazeRotation = 0;
 		zoomFactor = 1.0;
 
-		branch* trunk = (struct branch*) calloc(1, sizeof(struct branch));
-		growthFactor = .3;
-		trunk->branchGrowing = true;
-		trunk->startPoint.x = 0.0f;
-		trunk->startPoint.y = 0.0f;
-		trunk->startPoint.z = 0.0f;
-		trunk->angle = 0;
-		trunk->z_angle = 0;
-		trunk->steps = 0;
-		mainBranch = trunk;
+        trees = NULL;
+		plantSeeds(amountOfTrees);
 
 		currentTime = 0;
 	}
@@ -310,7 +380,6 @@ void specialKeys(int key, int x, int y) {
 	glutPostRedisplay();
 }
 
-
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -321,16 +390,10 @@ int main(int argc, char **argv)
 	glutCreateWindow("Viewer");								// create Window
 	/* handle window re-size event */
 	glutReshapeFunc(reshape_CB);
-	branch* trunk = (struct branch*) calloc(1, sizeof(struct branch));
-	growthFactor = .3;
-	trunk->branchGrowing = true;
-	trunk->startPoint.x = 0.0f;
-	trunk->startPoint.y = 0.0f;
-	trunk->startPoint.z = 0.0f;
-	trunk->angle = 0;
-	trunk->z_angle = 0;
-	trunk->steps = 0;
-	mainBranch = trunk;
+	
+    // Plant 25 trees
+    trees = NULL;
+    plantSeeds(amountOfTrees);
 
 	glutDisplayFunc(display);									// register Display Function
 	//glutIdleFunc(display);									// register Idle Function
