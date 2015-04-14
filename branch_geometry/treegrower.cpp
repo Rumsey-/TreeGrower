@@ -258,6 +258,7 @@ public:
 
 	void redraw( vec3 top, vec3 base)
 	{
+		vec3 original_base = base;
 		mat4 translate_to_origin_base = glm::translate(mat4(),vec3(-1.0 * base.x , -1.0 * base.y, -1.0 * base.z));
 		vec3 new_base = vec3(translate_to_origin_base * vec4(base,1.0));
 		vec3 new_top = vec3(translate_to_origin_base * vec4(top,1.0));
@@ -496,6 +497,7 @@ public:
 				punk[c]._shape_vertices[i].position = glm::rotate(mat4(), ( (float )(-1.0)  * angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * punk[c]._shape_vertices[i].position;
 				
 				punk[c]._shape_vertices[i].position = glm::rotate(mat4(), ((float )(-1.0)  * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * punk[c]._shape_vertices[i].position;
+				punk[c]._shape_vertices[i].position =  vec4(glm::translate(mat4(), (original_base)) * punk[c]._shape_vertices[i].position);
 				
 			}
 
@@ -505,6 +507,8 @@ public:
 			new_top = vec3(glm::rotate(mat4(), ( (float )(-1.0) * angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * vec4(new_top,1.0));
 			new_base = vec3(glm::rotate(mat4(), ((float )(-1.0) * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_base,1.0));
 			new_top = vec3(glm::rotate(mat4(), ((float )(-1.0) * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_top,1.0));
+			new_top =  vec3(glm::translate(mat4(), (original_base)) * vec4(new_top,1.0));
+			new_base =  vec3(glm::translate(mat4(), (original_base)) * vec4(new_base,1.0));
 			cout <<new_base.x<<" "<<new_base.y<<" "<<new_base.z<<endl;
 			cout <<new_top.x<<" "<<new_top.y<<" "<<new_top.z<<endl;
 			cout<<"vector length" <<sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) ) << endl;
@@ -985,10 +989,11 @@ int main(int argc, char **argv)
 	vector<vec3> resize;
 
 
-	vec3 base = vec3(1.0f,1.0f,1.0f);////from here (base of the line)
-	vec3 top = vec3(-1.0f,-1.0f,-1.0f);   //////to here (top of the line)
+	//vec3 base = vec3(0.0f,0.0f,0.0f);////from here (base of the line)
+	//vec3 top = vec3(0.0f,1.0f,0.0f);   //////to here (top of the line)
     
-
+	        vec3 base = vec3(1.0f,1.0f,1.0f);////from here (base of the line)
+			vec3 top = vec3(0.0f,0.0f,0.0f);   //////to here (top of the lin
 
 	for (int k = 0; k < stem_count; k++)
 	{
