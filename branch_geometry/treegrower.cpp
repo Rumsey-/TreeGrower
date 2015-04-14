@@ -24,7 +24,7 @@ float red = 0.0;
 float green = 0.0;
 float blue = 1.0;
 
-int object_count = 0;
+//int object_count = 0;
 
 struct branch {
 	glm::vec3 startPoint;
@@ -198,30 +198,33 @@ public:
 
 	}
 
-	void create_branch(vec3 initial_p_b, vec3 rotate_b, int object_count, vector<vec3> &resize_b )
+	//void create_branch(vec3 initial_p_b, vec3 rotate_b, int object_count, vector<vec3> &resize_b )
+	void create_branch( )
 	{
-		intial_position = initial_p_b;
-		rotation = rotate_b;
-		total_cyl = object_count;
-		resize = resize_b;
-		model2world = glm::translate(mat4(),vec3(intial_position));
-		world2model = glm::translate(mat4(),vec3(-1.0f * intial_position.x, -1.0f * intial_position.y, -1.0f * intial_position.z));
-		punk = new object[object_count];
-		object_buffer_id = new GLuint[object_count];
-		object_buffer_indices_id = new GLuint[object_count];
-		object_vertices_id = new GLuint[object_count];
-		track_object_vertices_count = new int[object_count];
-		float height1 = 0.0;
-		float height2 = 0.2;
-		for (int c = 0; c < object_count; c++)
+		//intial_position = initial_p_b;
+		//rotation = rotate_b;
+		//total_cyl = object_count;
+		total_cyl = 3;
+		//resize = resize_b;
+		//model2world = glm::translate(mat4(),vec3(intial_position));
+		//world2model = glm::translate(mat4(),vec3(-1.0f * intial_position.x, -1.0f * intial_position.y, -1.0f * intial_position.z));
+		punk = new object[total_cyl];
+		object_buffer_id = new GLuint[total_cyl];
+		object_buffer_indices_id = new GLuint[total_cyl];
+		object_vertices_id = new GLuint[total_cyl];
+		track_object_vertices_count = new int[total_cyl];
+		//float height1 = 0.0;
+		//float height2 = 0.2;
+		for (int c = 0; c < total_cyl; c++) 
 				{
 					punk[c].object_id = c + 1;
 					punk[c].vertex_counts = 100;
 					track_object_vertices_count[c] = 100;
-					double rad = ((360.0/(punk[c].vertex_counts/2)) * M_PI)/ 180.0;
-					double radius = 1.0f;
+					//double rad = ((360.0/(punk[c].vertex_counts/2)) * M_PI)/ 180.0;
+					//double radius = 1.0f;
 					punk[c].init_vertex();
 					punk[c].init_indices();
+					/*
 					for (int i = 0; i < (punk[c].vertex_counts/2); i++)
 						{
 							punk[c]._shape_vertices[i].position.x = (GLfloat) (radius * cosf(i * rad));
@@ -232,21 +235,279 @@ public:
 							punk[c]._shape_vertices[i + (punk[c].vertex_counts/2)].position.z = (GLfloat) (radius * sinf(i * rad));
 							punk[c]._shape_vertices[i + (punk[c].vertex_counts/2)].position.y = height2;
 						}
-					for (int i = 0; i < (punk[c].vertex_counts); i++)
+
+						*/
+					/*for (int i = 0; i < (punk[c].vertex_counts); i++)
 						{
 							cout <<"\n x "<<punk[c]._shape_vertices[i] .position.x<<
 								" y "<<punk[c]._shape_vertices[i] .position.y<<
 								" z "<<punk[c]._shape_vertices[i] .position.z;
 		
-						}
-					for (int i = 0; i < punk[c].vertex_counts;i++) 
+						}*/
+				/*	for (int i = 0; i < punk[c].vertex_counts;i++) 
 							punk[c]._shape_vertices[i].position =   model2world * punk[c]._shape_vertices[i].position;
 
 					height1 = height2;
 					height2 = height2 + 0.2;
+					*/
+
+				}
+		
+
+	}
+
+	void redraw( vec3 top, vec3 base)
+	{
+		mat4 translate_to_origin_base = glm::translate(mat4(),vec3(-1.0 * base.x , -1.0 * base.y, -1.0 * base.z));
+		vec3 new_base = vec3(translate_to_origin_base * vec4(base,1.0));
+		vec3 new_top = vec3(translate_to_origin_base * vec4(top,1.0));
+		cout <<new_base.x<<" "<<new_base.y<<" "<<new_base.z<<endl;
+		cout <<new_top.x<<" "<<new_top.y<<" "<<new_top.z<<endl;
+		cout<<"vector length" <<sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) ) << endl;
+
+
+
+		float angle_rot_y;
+		float angle_rot_z;
+		float vector_length = sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) );
+
+
+		
+		
+		if (((new_top.z -new_base.z) > 0) &&  ((new_top.x -new_base.x) > 0)) //quad 1
+		{
+			angle_rot_y =  atan((new_top.z - new_base.z)/(new_top.x -new_base.x));//
+		}
+		else if (((new_top.z -new_base.z) < 0) &&  ((new_top.x -new_base.x) < 0))//quad 3
+		{
+			angle_rot_y =  atan((new_top.z - new_base.z)/(new_top.x -new_base.x)) + M_PI;//
+		}
+		else if (((new_top.z -new_base.z) < 0) &&  ((new_top.x -new_base.x) > 0))//quad 4
+		{
+			angle_rot_y =  atan((new_top.z - new_base.z)/(new_top.x -new_base.x));//
+		}
+		else if (((new_top.z -new_base.z) > 0) &&  ((new_top.x -new_base.x) < 0))//quad 2
+		{
+			angle_rot_y =  atan((new_top.z - new_base.z)/(new_top.x -new_base.x)) + M_PI  ;//////// 2nd quad
+		}
+		else if ( ((new_top.z -new_base.z) > 0) && ((new_top.x -new_base.x) == 0) )   //
+		{
+			angle_rot_y =  M_PI/2.0;//
+		}
+		else if ( ((new_top.z -new_base.z) < 0) && ((new_top.x -new_base.x) == 0))   ///x/y
+		{
+			angle_rot_y = -1.0 * ( M_PI/2.0);
+		}
+		else if (((new_top.z -new_base.z) == 0) && ((new_top.x -new_base.x) < 0)) ///180
+		{
+			angle_rot_y = M_PI;
+		}
+		else
+			angle_rot_y = 0;
+		cout<<"rot" << angle_rot_y << " deg "<< angle_rot_y * 180 / M_PI <<endl;
+		new_base = vec3(glm::rotate(mat4(), ( angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_base,1.0));
+		new_top = vec3(glm::rotate(mat4(), ( angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_top,1.0));
+
+
+
+		cout <<new_base.x<<" "<<new_base.y<<" "<<new_base.z<<endl;
+		cout <<new_top.x<<" "<<new_top.y<<" "<<new_top.z<<endl;
+		cout<<"vector length" <<sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) ) << endl;
+
+
+
+		if (((new_top.x -new_base.x) > 0) &&  ((new_top.y -new_base.y) > 0)) //quad 1
+		{
+			angle_rot_z =  atan((new_top.x - new_base.x)/(new_top.y -new_base.y));
+		}
+		/*else if (((new_top.x -new_base.x) < 0) &&  ((new_top.y -new_base.y) < 0)) //quad 3
+		{
+			angle_rot_z = -1.0 * atan((new_top.x - new_base.x)/(new_top.y -new_base.y))  + M_PI;
+		}
+		
+		else if (((new_top.x -new_base.x) < 0) &&  ((new_top.y -new_base.y) > 0)) //
+		{
+			angle_rot_z = -1.0 * atan((new_top.x - new_base.x)/(new_top.y -new_base.y));
+		}*/
+		else if (((new_top.x -new_base.x) > 0) &&  ((new_top.y -new_base.y) < 0))
+		{
+			angle_rot_z =  atan((new_top.x - new_base.x)/(new_top.y -new_base.y))  + M_PI;
+		}
+		else if (((new_top.y -new_base.y) == 0) && ((new_top.x -new_base.x) > 0))   /////x/y
+		{
+			angle_rot_z =  M_PI/2.0;
+		}
+		/*else if (((new_top.y -new_base.y) == 0) && ((new_top.x -new_base.x) < 0))   ///x/y
+		{
+			angle_rot_z = (-1.0 * M_PI/2.0) + M_PI;
+		}*/
+		else if (((new_top.x -new_base.x) == 0) && ((new_top.y -new_base.y) < 0)) ///180
+		{
+			angle_rot_z = M_PI;
+		}
+		else
+			angle_rot_z = 0;
+
+
+		cout<<"rot" << angle_rot_z << " deg "<< angle_rot_z * 180 / M_PI <<endl;
+		new_base = vec3(glm::rotate(mat4(), ( angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * vec4(new_base,1.0));
+		new_top = vec3(glm::rotate(mat4(), ( angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * vec4(new_top,1.0));
+
+
+
+		cout <<new_base.x<<" "<<new_base.y<<" "<<new_base.z<<endl;
+		cout <<new_top.x<<" "<<new_top.y<<" "<<new_top.z<<endl;
+		cout<<"vector length" <<sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) ) << endl;
+
+
+
+
+		/*
+
+
+
+
+
+
+		
+		
+		float ang_xy; ///to rotate arround z axis
+		float ang_zx;
+		if (((top.x -base.x) > 0) &&  ((top.y -base.y) > 0))
+		{
+			ang_xy = -1.0 * atan((top.x - base.x)/(top.y -base.y));
+		}
+		else if (((top.x -base.x) < 0) &&  ((top.y -base.y) < 0))
+		{
+			ang_xy = -1.0 * atan((top.x - base.x)/(top.y -base.y))  + M_PI;
+		}
+		else if (((top.x -base.x) < 0) &&  ((top.y -base.y) > 0))
+		{
+			ang_xy = -1.0 * atan((top.x - base.x)/(top.y -base.y));
+		}
+		else if (((top.x -base.x) > 0) &&  ((top.y -base.y) < 0))
+		{
+			ang_xy = -1.0 * atan((top.x - base.x)/(top.y -base.y))  + M_PI;
+		}
+		else if (((top.y -base.y) == 0) && ((top.x -base.x) > 0))   /////x/y
+		{
+			ang_xy = -1.0 * M_PI/2.0;
+		}
+		else if (((top.y -base.y) == 0) && ((top.x -base.x) < 0))   ///x/y
+		{
+			ang_xy = (-1.0 * M_PI/2.0) + M_PI;
+		}
+		else if (((top.x -base.x) == 0) && ((top.y -base.y) < 0)) ///180
+		{
+			ang_xy = M_PI;
+		}
+		else
+			ang_xy = 0;
+
+
+		
+		if (((top.z -base.z) > 0) &&  ((top.x -base.x) > 0)) //
+		{
+			ang_zx =  atan((top.z - base.z)/(top.x -base.x));//
+		}
+		else if (((top.z -base.z) < 0) &&  ((top.x -base.x) < 0))//
+		{
+			ang_zx =  atan((top.z - base.z)/(top.x -base.x)) + M_PI;//
+		}
+		else if (((top.z -base.z) < 0) &&  ((top.x -base.x) > 0))//
+		{
+			ang_zx =  atan((top.z - base.z)/(top.x -base.x));//
+		}
+		else if (((top.z -base.z) > 0) &&  ((top.x -base.x) < 0))//
+		{
+			ang_zx =  atan((top.z - base.z)/(top.x -base.x));  + M_PI;//
+		}
+		else if ( ((top.z -base.z) > 0) && ((top.x -base.x) == 0) )   /////x/y//
+		{
+			ang_zx =  M_PI/2.0;//
+		}
+		else if ( ((top.z -base.z) < 0) && ((top.x -base.x) == 0))   ///x/y
+		{
+			ang_zx = ( M_PI/2.0) + M_PI;
+		}
+		else if (((top.z -base.z) == 0) && ((top.x -base.x) < 0)) ///180
+		{
+			ang_zx = M_PI;
+		}
+		else
+			ang_zx = 0;
+
+			*/
+
+		//if((top.x -base.x) != 0.0)
+		//{
+		//	ang_xy = -1.0 * atan((top.x - base.x)/(top.y -base.y));
+		//}
+
+		//ang_zx = atan((top.z - base.z)/(top.x -base.x));
+		
+		float height1 = 0.0;
+		float height2 = vector_length /8.0;
+		float radius1 = vector_length  /10.0;
+		float radius2 = vector_length  / 14.0;
+		
+		for (int c = 0; c < total_cyl; c++)
+		{
+			double rad = ((360.0/(punk[c].vertex_counts/2)) * M_PI)/ 180.0;
+
+			for (int i = 0; i < (punk[c].vertex_counts/2); i++)
+				{
+			
+					punk[c]._shape_vertices[i].position.x = (GLfloat) (radius1 * cosf(i * rad));
+					punk[c]._shape_vertices[i].position.z = (GLfloat) (radius1 * sinf(i * rad));
+					punk[c]._shape_vertices[i].position.y = height1;
+		
+					punk[c]._shape_vertices[i + (punk[c].vertex_counts/2)].position.x = (GLfloat) (radius2 * cosf(i * rad));
+					punk[c]._shape_vertices[i + (punk[c].vertex_counts/2)].position.z = (GLfloat) (radius2 * sinf(i * rad));
+					punk[c]._shape_vertices[i + (punk[c].vertex_counts/2)].position.y = height2;
+					
+
 
 
 				}
+				if (c == 0)
+					{
+						height1 = height2;
+						radius1 = radius2;
+						height2 = (3.0 * vector_length )/8.0 + height2;
+						radius2 = vector_length  /20.0;
+
+					} else if (c == 1)
+					{
+						height1 = height2;
+						radius1 = radius2;
+						height2 = (vector_length )/2.0 + height2;
+						radius2 = 0.0001;
+					}
+			
+
+			
+
+			for (int i = 0; i < punk[c].vertex_counts;i++) 
+			{
+				//punk[c]._shape_vertices[i].position =   glm::rotate(mat4(), x , glm::vec3(1.0f,0.0f,0.0f)) * obj[count]._shape_vertices[i].position; 
+
+				
+				punk[c]._shape_vertices[i].position = glm::rotate(mat4(), ( (float )(-1.0)  * angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * punk[c]._shape_vertices[i].position;
+				
+				punk[c]._shape_vertices[i].position = glm::rotate(mat4(), ((float )(-1.0)  * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * punk[c]._shape_vertices[i].position;
+				
+			}
+
+
+		}
+		new_base = vec3(glm::rotate(mat4(), ((float )(-1.0) *  angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * vec4(new_base,1.0));
+			new_top = vec3(glm::rotate(mat4(), ( (float )(-1.0) * angle_rot_z) , glm::vec3(0.0f,0.0f,1.0f)) * vec4(new_top,1.0));
+			new_base = vec3(glm::rotate(mat4(), ((float )(-1.0) * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_base,1.0));
+			new_top = vec3(glm::rotate(mat4(), ((float )(-1.0) * angle_rot_y) , glm::vec3(0.0f,1.0f,0.0f)) * vec4(new_top,1.0));
+			cout <<new_base.x<<" "<<new_base.y<<" "<<new_base.z<<endl;
+			cout <<new_top.x<<" "<<new_top.y<<" "<<new_top.z<<endl;
+			cout<<"vector length" <<sqrt(pow((new_top.x - new_base.x),2.0) + pow((new_top.y - new_base.y),2.0) +pow((new_top.z - new_base.z),2.0) ) << endl;
 		
 
 	}
@@ -327,21 +588,21 @@ public:
 		    //for (int i = 0; i < 15; i = i + 3) {  ////incremeting i by 3. drawing next set of 150 vertices. 
 					{
 						
-						cout <<endl<<"Triangle "<<k;
+						//cout <<endl<<"Triangle "<<k;
 						glVertex3f(punk[j]._shape_vertices[k].position.x, punk[j]._shape_vertices[k].position.y, punk[j]._shape_vertices[k].position.z);
-						cout <<std::endl<<k;
+						//cout <<std::endl<<k;
 						if ((k + 1) == (punk[j].vertex_counts)) {
 							glVertex3f(punk[j]._shape_vertices[punk[j].vertex_counts / 2].position.x, punk[j]._shape_vertices[punk[j].vertex_counts / 2].position.y, punk[j]._shape_vertices[punk[j].vertex_counts / 2].position.z);
-							cout<<endl<<punk[j].vertex_counts / 2;
+							//cout<<endl<<punk[j].vertex_counts / 2;
 						}
 						else {
 							glVertex3f(punk[j]._shape_vertices[k + 1].position.x, punk[j]._shape_vertices[k + 1].position.y, punk[j]._shape_vertices[k + 1].position.z);
-							cout<<endl<<k+1;
+							//cout<<endl<<k+1;
 						}
 						if ((k - (punk[j].vertex_counts / 2) + 1) == (punk[j].vertex_counts / 2))
 						{
 							glVertex3f(punk[j]._shape_vertices[0].position.x, punk[j]._shape_vertices[0].position.y, punk[j]._shape_vertices[0].position.z);
-							cout<<endl<<0;
+							//cout<<endl<<0;
 						}
 						else
 						{
@@ -377,6 +638,7 @@ public:
 
 
 };
+
 
 
 Branch_class *stem;
@@ -586,7 +848,7 @@ void key(unsigned char key, int x_cord, int y_cord) {
 		verticalPos -= .01;
 
 	}
-	if (key == 'G' || key == 'g') {
+	/*if (key == 'G' || key == 'g') {
 			for (int k = 0; k < stem_count; k++)
 				{
 					vector<vec3> resize_b;
@@ -600,7 +862,7 @@ void key(unsigned char key, int x_cord, int y_cord) {
 				}
 		
 
-	}
+	}*/
 
 	if (key == 'v' || key == 'V') {
 
@@ -621,7 +883,7 @@ void key(unsigned char key, int x_cord, int y_cord) {
 	if (key == 'R' || key == 'r') {
 		//reset initial values
 		verticalPos = 0;
-		eyeRotation = 0;
+		eyeRotation = 45.0;
 		gazeRotation = 0;
 		zoomFactor = 1.0;
 
@@ -648,7 +910,13 @@ void key(unsigned char key, int x_cord, int y_cord) {
 
 		for (int k = 0; k < stem_count; k++)
 		{
-			stem[k].create_branch(vec3(0.0f,0.0f,0.0f), vec3(0.0f,0.0f,0.0f), 3,resize);
+			//stem[k].create_branch(vec3(0.0f,0.0f,0.0f), vec3(0.0f,0.0f,0.0f), 3,resize);
+			stem[k].create_branch();
+			//stem[k].redraw( vec3(1.0f,1.0f,1.0f) , vec3(-1.0f,-1.0f,-1.0f));
+			vec3 base = vec3(1.0f,1.0f,1.0f);////from here (base of the line)
+			vec3 top = vec3(-1.0f,-1.0f,-1.0f);   //////to here (top of the line)
+    
+			stem[k].redraw( top , base);
 		}
 
 	}
@@ -715,12 +983,29 @@ int main(int argc, char **argv)
 	//punk = new object[object_count];
 	stem = new Branch_class[stem_count]; //allocate memory to all the stems
 	vector<vec3> resize;
-	
+
+
+	vec3 base = vec3(1.0f,1.0f,1.0f);////from here (base of the line)
+	vec3 top = vec3(-1.0f,-1.0f,-1.0f);   //////to here (top of the line)
+    
 
 
 	for (int k = 0; k < stem_count; k++)
 	{
-		stem[k].create_branch(vec3(0.0f,0.0f,0.0f), vec3(0.0f,0.0f,0.0f), 3,resize);  /////create branch geometry for all the stems..with each stem made up of 3 cylinders
+		stem[k].create_branch();  /////create branch geometry for all the stems..with each stem made up of 3 cylinders
+		//stem[k].create_branch(vec3(0.0f,0.0f,0.0f), vec3(0.0f,0.0f,0.0f), 3,resize);  /////create branch geometry for all the stems..with each stem made up of 3 cylinders
+		//stem[k].redraw( vec3(1.0f,1.0f,1.0f) , vec3(-1.0f,-1.0f,-1.0f));
+		//stem[k].redraw( vec3(0.1f,-1.0f,0.0f) , vec3(-0.1f,1.0f,0.0f));
+		//stem[k].redraw( vec3(-0.1f, -1.0f,0.0f) , vec3(0.1f,1.0f,0.0f));
+		//stem[k].redraw( vec3(0.1f, -1.0f,0.0f) , vec3(-0.1f,-1.0f,0.0f));///90
+		//stem[k].redraw( vec3(0.0f, -2.0f,0.0f) , vec3(0.0f,-1.0f,0.0f));
+		//stem[k].redraw( vec3(1.0f,1.0f,-1.0f) , vec3(-1.0f,-1.0f,1.0f));
+		//stem[k].redraw( vec3(1.0f,1.0f,1.0f) , vec3(-1.0f,-1.0f,-1.0f));
+		//stem[k].redraw( vec3(0,0.0f,0.5f) , vec3(0.0f,0.0f,-0.5f));
+		//stem[k].redraw( vec3(0.1f,1.0f,1.0f) , vec3(0.0f,0.0f,0.0f));///resolve this
+		//stem[k].redraw( vec3(0,3.0f,0) , vec3(0,0,0));
+		//stem[k].redraw( vec3(0.1f,1.0f,1.0f) , vec3(0.5f,0.2f,-9.0f));
+		stem[k].redraw( top,base);  ////////////////Sample
 	}
 	
 
